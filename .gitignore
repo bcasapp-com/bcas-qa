@@ -1,0 +1,29 @@
+#claude
+/.playwright-mcp
+
+
+.DS_Store
+temp/
+.playwright-mcp/
+.claude/settings.local.json
+
+/docs/superpowers
+
+*storybook.log
+storybook-static
+
+# e2e (Playwright + Allure) — generated reports, never commit
+/qa/playwright-report/
+/qa/allure-results/
+/qa/allure-report/
+/qa/test-results/
+/qa/.auth/
+
+
+
+# dependencies
+node_modules/
+
+
+#env files
+.env
