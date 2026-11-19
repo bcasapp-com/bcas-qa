@@ -35,23 +35,25 @@ pipeline {
       }
     }
 
-  stage('Tests') {
-    steps {
-      withCredentials([file(credentialsId: 'e2e-env', variable: 'ENV_FILE')]) {
-        sh '''
-          cp "$ENV_FILE" .env
-          rm -rf allure-results
-          ARGS=""
-          [ "$BROWSER" != "all" ] && ARGS="$ARGS --project=$BROWSER"
-          [ -n "$GREP" ] && ARGS="$ARGS --grep=$GREP"
-          pnpm exec playwright test $ARGS
-        '''
+    stage('Tests') {
+      steps {
+        withCredentials([file(credentialsId: 'e2e-env', variable: 'ENV_FILE')]) {
+          sh '''
+            cp "$ENV_FILE" .env
+            rm -rf allure-results
+            ARGS=""
+            [ "$BROWSER" != "all" ] && ARGS="$ARGS --project=$BROWSER"
+            [ -n "$GREP" ] && ARGS="$ARGS --grep=$GREP"
+            pnpm exec playwright test $ARGS
+          '''
+        }
       }
     }
   }
 
   post {
     always {
+      sh 'rm -f .env'
       sh 'zip -rq allure-results.zip allure-results || true'
       archiveArtifacts artifacts: 'playwright-report/**, test-results/**, allure-results.zip', allowEmptyArchive: true
       withCredentials([usernamePassword(credentialsId: 'allure-admin',
