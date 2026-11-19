@@ -14,7 +14,6 @@ pipeline {
 
   environment {
     CI = 'true'
-    PNPM_VERSION      = '9.0'  
     ALLURE_URL        = 'http://allure-docker-service.railway.internal:5050'
     ALLURE_PUBLIC_URL = 'https://allure-docker-service-qa.up.railway.app'
     ALLURE_PROJECT    = 'qa-e2e'
@@ -23,8 +22,12 @@ pipeline {
   stages {
     stage('Instalar') {
       steps {
-        // Temporal: instala pnpm solo si la imagen del agente aún no lo trae
-        sh 'command -v pnpm || npm install -g pnpm@$PNPM_VERSION'
+        sh '''
+          PNPM_VERSION=$(node -p "require('./package.json').packageManager.split('@')[1].split('+')[0]")
+          if [ "$(pnpm --version 2>/dev/null)" != "$PNPM_VERSION" ]; then
+            npm install -g "pnpm@$PNPM_VERSION"
+          fi
+        '''
         sh 'node --version && pnpm --version'
 
         sh 'pnpm install --frozen-lockfile'
