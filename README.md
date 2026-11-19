@@ -7,7 +7,7 @@ Tests end-to-end con Playwright (Page Object Model) y reportes en Allure.
 1. Copia `.env.example` a `.env` y rellena las credenciales (nunca se comitea).
 2. Instala dependencias desde la raíz del repo con `pnpm install` (nunca `npm`).
 
-## Comandos (desde la raíz o desde `qa/`)
+## Comandos (desde la raíz)
 
 ```bash
 pnpm test:e2e                   # correr todos los tests
