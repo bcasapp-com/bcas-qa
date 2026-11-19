@@ -37,13 +37,23 @@ pipeline {
 
     stage('Tests') {
       steps {
-        sh '''
-          rm -rf allure-results
-          ARGS=""
-          [ "$BROWSER" != "all" ] && ARGS="$ARGS --project=$BROWSER"
-          [ -n "$GREP" ] && ARGS="$ARGS --grep=$GREP"
-          pnpm exec playwright test $ARGS
-        '''
+        // Credenciales de los usuarios de prueba (en local salen de .env, que no se versiona)
+        withCredentials([
+          usernamePassword(credentialsId: 'e2e-test-user',
+                           usernameVariable: 'E2E_TEST_USER_EMAIL', passwordVariable: 'E2E_TEST_USER_PASSWORD'),
+          usernamePassword(credentialsId: 'e2e-test-student',
+                           usernameVariable: 'E2E_TEST_STUDENT_EMAIL', passwordVariable: 'E2E_TEST_STUDENT_PASSWORD'),
+          usernamePassword(credentialsId: 'e2e-test-agent',
+                           usernameVariable: 'E2E_TEST_AGENT_EMAIL', passwordVariable: 'E2E_TEST_AGENT_PASSWORD')
+        ]) {
+          sh '''
+            rm -rf allure-results
+            ARGS=""
+            [ "$BROWSER" != "all" ] && ARGS="$ARGS --project=$BROWSER"
+            [ -n "$GREP" ] && ARGS="$ARGS --grep=$GREP"
+            pnpm exec playwright test $ARGS
+          '''
+        }
       }
     }
   }
