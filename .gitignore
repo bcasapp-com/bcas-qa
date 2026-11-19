@@ -13,11 +13,11 @@ temp/
 storybook-static
 
 # e2e (Playwright + Allure) — generated reports, never commit
-/qa/playwright-report/
-/qa/allure-results/
-/qa/allure-report/
-/qa/test-results/
-/qa/.auth/
+playwright-report/
+allure-results/
+allure-report/
+test-results/
+.auth/
 
 
 
