@@ -1,12 +1,14 @@
 FROM jenkins/inbound-agent:latest-jdk21
 
 ARG PLAYWRIGHT_VERSION=1.56.0
+ARG PNPM_VERSION=9.0      
 
 USER root
 RUN apt-get update \
  && apt-get install -y curl ca-certificates zip \
  && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
  && apt-get install -y nodejs \
+ && npm install -g pnpm@${PNPM_VERSION} \
  && npx -y playwright@${PLAYWRIGHT_VERSION} install-deps \
  && rm -rf /var/lib/apt/lists/*
 

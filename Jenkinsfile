@@ -22,8 +22,8 @@ pipeline {
   stages {
     stage('Instalar') {
       steps {
-        sh 'npm ci'
-        sh 'if [ "$BROWSER" = "all" ]; then npx playwright install; else npx playwright install "$BROWSER"; fi'
+        sh 'pnpm install --frozen-lockfile'
+        sh 'if [ "$BROWSER" = "all" ]; then pnpm exec playwright install; else pnpm exec playwright install "$BROWSER"; fi'
       }
     }
     stage('Tests') {
@@ -33,7 +33,7 @@ pipeline {
           ARGS=""
           [ "$BROWSER" != "all" ] && ARGS="$ARGS --project=$BROWSER"
           [ -n "$GREP" ] && ARGS="$ARGS --grep=$GREP"
-          npx playwright test $ARGS
+          pnpm exec playwright test $ARGS
         '''
       }
     }
