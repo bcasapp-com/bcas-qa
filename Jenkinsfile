@@ -23,7 +23,6 @@ pipeline {
     ALLURE_URL        = 'http://allure-docker-service.railway.internal:8080'
     ALLURE_PUBLIC_URL = 'https://allure-docker-service-qa.up.railway.app'
     ALLURE_PROJECT    = 'bcas-qa'
-    EMAIL_TO          = 'ana.gonzalez@bcasapp.com'
   }
 
   stages {
@@ -47,7 +46,7 @@ pipeline {
         withCredentials([file(credentialsId: 'e2e-env', variable: 'ENV_FILE')]) {
           sh '''
             cp "$ENV_FILE" .env
-            rm -rf allure-results playwright-report
+            rm -rf allure-results
             ARGS=""
             [ "$BROWSER" != "all" ] && ARGS="$ARGS --project=$BROWSER"
             [ -n "$GREP" ] && ARGS="$ARGS --grep=$GREP"
@@ -63,16 +62,6 @@ pipeline {
       sh 'rm -f .env'
       sh 'zip -rq allure-results.zip allure-results || true'
       archiveArtifacts artifacts: 'playwright-report/**, test-results/**, allure-results.zip', allowEmptyArchive: true
-
-      // Antes de Allure para que un fallo al subir el reporte no impida el email
-      sh 'node ci/email-summary.mjs playwright-report/results.json email-summary.html'
-      emailext(
-        to: env.EMAIL_TO,
-        subject: "[E2E] ${currentBuild.currentResult} · ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-        mimeType: 'text/html',
-        body: '${FILE,path="email-summary.html"}'
-      )
-
       withCredentials([usernamePassword(credentialsId: 'allure-admin',
                        usernameVariable: 'ALLURE_USER', passwordVariable: 'ALLURE_PASS')]) {
         sh 'bash ci/send-allure.sh'

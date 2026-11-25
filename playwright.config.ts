@@ -17,12 +17,7 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [
-    ['list'],
-    ['allure-playwright', { resultsDir: 'allure-results' }],
-    // Read by ci/email-summary.mjs to build the results email
-    ['json', { outputFile: 'playwright-report/results.json' }]
-  ],
+  reporter: [['list'], ['allure-playwright', { resultsDir: 'allure-results' }]],
   use: {
     baseURL,
     testIdAttribute: 'data-test-id',
