@@ -7,6 +7,12 @@ pipeline {
     disableConcurrentBuilds()
   }
 
+  // Ejecución diaria a las 8:00 hora de Madrid, con los valores por defecto de los parámetros
+  triggers {
+    cron('''TZ=Europe/Madrid
+42 14 * * *''')
+  }
+
   parameters {
     choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit', 'all'], description: 'Proyecto de Playwright')
     string(name: 'GREP', defaultValue: '', description: 'Filtro de tests, ej: @smoke')
