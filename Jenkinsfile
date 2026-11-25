@@ -7,10 +7,10 @@ pipeline {
     disableConcurrentBuilds()
   }
 
-  // Ejecución diaria a las 8:00 hora de Madrid, con los valores por defecto de los parámetros
+  // Ejecución diaria a las 6:00 hora de Madrid, con los valores por defecto de los parámetros
   triggers {
     cron('''TZ=Europe/Madrid
-50 14 * * *''')
+0 6 * * *''')
   }
 
   parameters {
@@ -23,6 +23,7 @@ pipeline {
     ALLURE_URL        = 'http://allure-docker-service.railway.internal:8080'
     ALLURE_PUBLIC_URL = 'https://allure-docker-service-qa.up.railway.app'
     ALLURE_PROJECT    = 'bcas-qa'
+    EMAIL_TO          = 'ana.gonzalez@bcasapp.com'
   }
 
   stages {
@@ -46,7 +47,7 @@ pipeline {
         withCredentials([file(credentialsId: 'e2e-env', variable: 'ENV_FILE')]) {
           sh '''
             cp "$ENV_FILE" .env
-            rm -rf allure-results
+            rm -rf allure-results playwright-report
             ARGS=""
             [ "$BROWSER" != "all" ] && ARGS="$ARGS --project=$BROWSER"
             [ -n "$GREP" ] && ARGS="$ARGS --grep=$GREP"
@@ -62,6 +63,16 @@ pipeline {
       sh 'rm -f .env'
       sh 'zip -rq allure-results.zip allure-results || true'
       archiveArtifacts artifacts: 'playwright-report/**, test-results/**, allure-results.zip', allowEmptyArchive: true
+
+      // Antes de Allure para que un fallo al subir el reporte no impida el email
+      sh 'node ci/email-summary.mjs playwright-report/results.json email-summary.html'
+      emailext(
+        to: env.EMAIL_TO,
+        subject: "[E2E] ${currentBuild.currentResult} · ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+        mimeType: 'text/html',
+        body: '${FILE,path="email-summary.html"}'
+      )
+
       withCredentials([usernamePassword(credentialsId: 'allure-admin',
                        usernameVariable: 'ALLURE_USER', passwordVariable: 'ALLURE_PASS')]) {
         sh 'bash ci/send-allure.sh'
