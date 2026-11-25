@@ -7,6 +7,12 @@ pipeline {
     disableConcurrentBuilds()
   }
 
+  // Ejecución diaria a las 6:00 hora de Madrid, con los valores por defecto de los parámetros
+  triggers {
+    cron('''TZ=Europe/Madrid
+0 6 * * *''')
+  }
+
   parameters {
     choice(name: 'BROWSER', choices: ['chromium', 'firefox', 'webkit', 'all'], description: 'Proyecto de Playwright')
     string(name: 'GREP', defaultValue: '', description: 'Filtro de tests, ej: @smoke')
@@ -16,7 +22,7 @@ pipeline {
     CI = 'true'
     ALLURE_URL        = 'http://allure-docker-service.railway.internal:8080'
     ALLURE_PUBLIC_URL = 'https://allure-docker-service-qa.up.railway.app'
-    ALLURE_PROJECT    = 'qa-e2e'
+    ALLURE_PROJECT    = 'bcas-qa'
   }
 
   stages {

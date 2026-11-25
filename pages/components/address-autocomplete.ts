@@ -28,13 +28,13 @@ export class AddressAutocomplete {
     return this.page.getByTestId(`${this.testIdBase}-option-${index}`)
   }
 
-  // An address already saved is shown read-only, so the search has to be reopened first
   async search(text: string): Promise<void> {
     await this.input.or(this.confirmed).waitFor()
     if (await this.confirmed.isVisible()) {
       await this.changeButton.click()
     }
 
+    await this.input.evaluate((input) => input.scrollIntoView({ block: 'center' }))
     await this.input.fill(text)
   }
 
