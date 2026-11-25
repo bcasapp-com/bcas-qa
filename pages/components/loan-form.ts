@@ -1,3 +1,5 @@
+import { expect } from '@playwright/test'
+
 import { AddressAutocomplete } from './address-autocomplete'
 import { Toast } from './toast'
 import { SLOW_PAGE_TIMEOUT } from '../../utils/timeouts'
@@ -137,7 +139,7 @@ export class LoanForm {
   }
 
   async toggleInstallment(installments: string): Promise<void> {
-    await this.clickInstallmentsChevron()
+    await this.openInstallments()
     await this.option(installments).click()
     await this.clickInstallmentsChevron()
     await this.page.getByRole('option').first().waitFor({ state: 'hidden' })
@@ -222,6 +224,18 @@ export class LoanForm {
   private async pickOption(select: Locator, name: string): Promise<void> {
     await select.click()
     await this.option(name).click()
+  }
+
+  // Reopened right after closing, the select can report itself expanded without rendering the
+  // options, so it is closed and opened again until they show up
+  private async openInstallments(): Promise<void> {
+    await expect(async () => {
+      if ((await this.installmentsSelect.getAttribute('aria-expanded')) === 'true') {
+        await this.clickInstallmentsChevron()
+      }
+      await this.clickInstallmentsChevron()
+      await this.page.getByRole('option').first().waitFor({ timeout: 2_000 })
+    }).toPass({ timeout: SLOW_PAGE_TIMEOUT })
   }
 
   // The chevron ignores pointer events, so the click goes to the box at the chevron's position.
